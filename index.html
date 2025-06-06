@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Color Compare Slider</title>
+  <style>
+    :where(fieldset[data-uic~="color-compare"]) {
+      border: var(--cc-bdw, 1px) solid var(--cc-bdc, #CCC);
+      border-radius: var(--cc-bdrs, .25em);
+      container-type: inline-size;
+      display: grid;
+      margin: 0;
+      padding: 0;
+    }
+
+    fieldset[data-uic~="color-compare"] img,
+    fieldset[data-uic~="color-compare"] input {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+      position: relative;
+    }
+
+    fieldset[data-uic~="color-compare"] img {
+      width: 100%;
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=color] {
+      align-self: var(--cc-color-as, start);
+      background: transparent;
+      border: 0;
+      border-radius: var(--cc-color-bdrs, 50%);
+      height: var(--cc-color-w, min(10cqi, 5em));
+      margin: 1cqi;
+      padding: 0;
+      width: var(--cc-color-w, min(10cqi, 5em));
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=color]::-webkit-color-swatch,
+    fieldset[data-uic~="color-compare"] input[type=color]::-webkit-color-swatch-wrapper {
+      border: 0;
+      border-radius: inherit;
+      padding: 0;
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=range] {
+      appearance: none;
+      background: transparent;
+      margin: 0;
+      touch-action: none;
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=range]::before {
+      background-image: linear-gradient(to right, var(--_c1) 0 var(--_x), var(--_c2) 0 var(--_x));
+      content: "";
+      inset: 0;
+      -webkit-mask: var(--cc-mask) no-repeat center / cover;
+      mask: var(--cc-mask) no-repeat center / cover;
+      mix-blend-mode: multiply;
+      position: absolute;
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=range]::-webkit-slider-runnable-track {
+      height: 100%;
+    }
+
+    fieldset[data-uic~="color-compare"] input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--cc-thumb-bg, #CCC);
+      cursor: ew-resize;
+      height: 100%;
+      position: relative;
+      width: var(--cc-thumb-w, min(3cqi, 1.25em));
+    }
+
+    fieldset[data-uic~="color-compare"] label {
+      display: contents;
+    }
+
+    fieldset[data-uic~="color-compare"] label:has(input[type=color]):last-of-type input {
+      justify-self: end;
+    }
+
+    body {
+      background: canvas;
+      color: canvastext;
+      color-scheme: light dark;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      margin-inline: auto;
+      padding-inline: 2ch;
+    }
+  </style>
+</head>
+<body>
+
+  <p>
+    <small>Pick two colors, and drag the gray slider to compare.</small>
+  </p>
+
+  <fieldset data-uic="color-compare" style="--cc-mask:url('https://assets.stoumann.dk/img/colors-base.webp');">
+    <img src="https://assets.stoumann.dk/img/colors-base.webp" alt="Image of a car" loading="lazy" decoding="async">
+    <label aria-label="Slide to compare two colors against an image">
+      <input type="range" value="50" name="_x" data-scope="fieldset" data-unit="%">
+    </label>
+    <label aria-label="First color">
+      <input type="color" value="#DCAEE5" data-scope="fieldset" data-key="_c1">
+    </label>
+    <label aria-label="Second color">
+      <input type="color" value="#9285D6" data-scope="fieldset" data-key="_c2">
+    </label>
+  </fieldset>
+
+  <p>
+    <small>Image tweaked and modified from 
+      <a href="https://css-tricks.com/two-images-and-an-api-everything-we-need-for-recoloring-products/">this article</a>.
+      Firefox does <strong>not support</strong> CSS nesting yet.
+    </small>
+  </p>
+
+  <script>
+    const compare = document.querySelector('[data-uic="color-compare"]');
+    compare.addEventListener('input', event => property(event.target));
+    Array.from(compare.elements).forEach(element => property(element));
+
+    function scope(input, scope) {
+      switch (scope) {
+        case 'fieldset': return input.closest('fieldset');
+        case 'form': return input.form;
+        case 'next': return input.nextElementSibling;
+        case 'parent': return input.parentNode;
+        case 'prev': return input.previousElementSibling;
+        case 'root': return document.documentElement;
+        default: return scope?.length ? document.querySelector(scope) : input;
+      }
+    }
+
+    function property(input) {
+      const key = input.dataset.key || input.name;
+      const node = scope(input, input.dataset.scope);
+      if (key && node) {
+        const value = input.value + (input.dataset.unit || '');
+        node.style.setProperty(key.startsWith('--') ? key : '--' + key, value);
+      }
+    }
+  </script>
+
+</body>
+</html>
